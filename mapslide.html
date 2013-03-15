@@ -1,0 +1,36 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Before/After Demo</title>
+<script type="text/javascript" src="js/beforeafter/js/jquery-1.6.1.min.js"></script>
+<script type="text/javascript" src="js/beforeafter/js/jquery-ui-1.8.13.custom.min.js"></script>
+<script type="text/javascript" src="js/beforeafter/js/jquery.beforeafter-1.4.min.js"></script>
+<script type="text/javascript">
+$(function(){
+	$('#container').beforeAfter({
+		imagePath:'.',
+		animateIntro: true,
+		showFullLinks: true,
+		enableKeyboard: true,
+		imagePath:'js/beforeafter/js/',
+		cursor:'move'
+	});
+});
+</script>
+<style type="text/css">
+#container, #container1 {
+	border:2px solid #666;
+}
+</style>
+</head>
+
+<body>
+
+<div id="container">
+	<div><img alt="before" src="img/maillas_densidad_pob_1993.png" width="500" /></div>
+	<div><img alt="after" src="img/densidad_mallas_pob_2007.png" width="500" /></div>
+</div>
+
+</body>
+</html>
