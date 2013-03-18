@@ -12,6 +12,7 @@
 #-------------------------------------------------------------------------------
 
 from Tkinter import *
+from tkFileDialog import askopenfile
 
 class mapslider(Tk):
     def __init__(self):
@@ -26,12 +27,21 @@ class mapslider(Tk):
         self.pathbefore = Entry(self)
         self.pathafter = Entry(self)
         # browse buttons
-        self.browsebef = Button(self, text = 'Browse')
-        self.browseaft = Button(self, text = 'Browse')
+        self.browsebef = Button(self, text = 'Browse', command = self.browsepath(bef))
+        self.browseaft = Button(self, text = 'Browse', command = self.browsepath(aft))
         # basic buttons
         self.validate = Button(self, text = 'Browse')
         self.cancel = Button(self, text = 'Browse', command = self.annuler)
 
+    def browsepath(self, entree):
+            filename = askopenfile(parent = self, filetypes = (("Images", "*.jpg;*.jpeg;*.png"),
+                                                ("All files", "*.*")))
+            if filename:
+                try:
+                    self.settings["template"].set(filename)
+                except:
+                    tkMessageBox.showerror("Open Source File", "Failed to read file \n'%s'"%filename)
+                    return
 
     def annuler(self):
         self.destroy()
