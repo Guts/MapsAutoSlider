@@ -15,11 +15,15 @@
 ##### Libraries importation #######
 ###################################
 
+# standard library
 from Tkinter import Tk, Label, Button, W, Entry
 from tkFileDialog import askopenfilename, askdirectory
+from tkMessageBox import showerror
 from os import mkdir, path
 from shutil import copytree, copy2
 from webbrowser import open as webview
+# third party
+from modules import EXIF # by https://github.com/ianare/exif-py
 
 ###################################
 ## Class and functions definition #
@@ -78,7 +82,7 @@ class mapslider(Tk):
         """ ...browse and insert the path of FIRST image  """
         self.filename = askopenfilename(parent = self,
                                             title = 'Select the "before" image',
-                                            filetypes = (("Images", "*.jpg;*.jpeg;*.png"),
+                                            filetypes = (("Images", "*.jpg;*.jpeg;*.png;*.tiff"),
                                                          ("All files", "*.*")))
         if self.filename:
             try:
@@ -92,7 +96,7 @@ class mapslider(Tk):
         """ ...browse and insert the path of SECOND image """
         self.filename = askopenfilename(parent = self,
                                         title = 'Select the "after" image',
-                                        filetypes = (("Images", "*.jpg;*.jpeg;*.png"),
+                                        filetypes = (("Images", "*.jpg;*.jpeg;*.png;*.tiff"),
                                                      ("All files", "*.*")))
         if self.filename:
             try:
@@ -115,6 +119,14 @@ class mapslider(Tk):
         return self.foldername
 
     def processhtml(self):
+        # if jpeg or tiff images => test images dimensions
+        extimg = (path.splitext(self.pathbefore.get())[1],
+                  path.splitext(self.pathafter.get())[1])
+        extok = ('.jpeg', '.jpg', '.JPG', '.JPEG', '.tiff', '.TIFF')
+        if [i for i in extimg if i in extok]:
+            self.testdim(self.pathbefore.get(), self.pathafter.get())
+        else:
+            print "Images format couldn't be tested."
         # variables
         img1 = 'img/' + path.basename(self.pathbefore.get())
         img2 = 'img/' + path.basename(self.pathafter.get())
@@ -147,6 +159,31 @@ class mapslider(Tk):
         webview(self.out.name)
         #end of function
         return self.out
+
+    def testdim(self, pathimg1, pathimg2):
+        """ test dimensions if jpeg and tiff images selected """
+        # reading EXIF tags inside images files
+        with open(pathimg1, 'rb') as mag1, open(pathimg2, 'rb') as mag2:
+            tag1 = EXIF.process_file(mag1,
+                                     details = False,
+                                     stop_tag='ExifImageLength')
+            tag2 = EXIF.process_file(mag2,
+                                     details = False,
+                                     stop_tag='ExifImageLength')
+        # getting dimensions tags keys
+        self.w1 = int(str(tag1.get('EXIF ExifImageWidth')))
+        self.w2 = int(str(tag2.get('EXIF ExifImageWidth')))
+        self.l1 = int(str(tag1.get('EXIF ExifImageLength')))
+        self.l2 = int(str(tag2.get('EXIF ExifImageLength')))
+        # comparing
+        if not self.w1 == self.w2 and self.l1 == self.l2:
+            showerror(self, title='Dimensions error',
+                            message = 'Both images may have the same dimensions')
+        else:
+            'everything ok'
+        # end of function
+        return self.w1, self.w2, self.l1, self.l2
+
 
 
 
