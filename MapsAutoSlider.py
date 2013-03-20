@@ -2,23 +2,33 @@
 #!/usr/bin/env python
 #-------------------------------------------------------------------------------
 # Name:        MapsAutoSlider
-# Purpose:
-#
+# Purpose:     GUI to create easily a html page with a javascript slider to
+#          compare 2 images or maps. The js script is authored by atchmyfame.com
+#          See http://www.catchmyfame.com/catchmyfame-jquery-plugins/jquery-beforeafter-plugin/
 # Author:      Julien M.
-#
-# Created:     15/03/2013
-# Copyright:   (c) Utilisateur 2013
-# Licence:     <your licence>
+# Created:     19/03/2013
+# Licence:     CC Attribution-NonCommercial-ShareAlike 3.0 Unported
+#          CC BY-NC-SA 3.0)-http://creativecommons.org/licenses/by-nc-sa/3.0/
 #-------------------------------------------------------------------------------
 
-from Tkinter import *
+###################################
+##### Libraries importation #######
+###################################
+
+from Tkinter import Tk, Label, Button, W, Entry
 from tkFileDialog import askopenfilename, askdirectory
+from os import mkdir, path
+from shutil import copytree, copy2
+from webbrowser import open as webview
+
+###################################
+## Class and functions definition #
+###################################
 
 class mapslider(Tk):
     """ Main class """
     def __init__(self):
-        Tk.__init__(self)   # constructeur de la classe parente
-##        self.withdraw()
+        Tk.__init__(self)   # constructor of parent graphic class
         self.title(u'Choose your maps before and after')
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
@@ -45,12 +55,12 @@ class mapslider(Tk):
         # basic buttons
         self.validate = Button(self, text = 'Validate',
                                      relief= 'raised',
-                                     command = self.templhtml(self.pathbefore.get(), self.pathafter.get()))
+                                     command = self.processhtml)
         self.cancel = Button(self, text = 'Cancel (quit)',
                                    relief= 'groove',
                                    command = self.destroy)
 
-        # placement
+        # widgets placement
         self.labglob.grid(row = 0, column = 0, columnspan = 3)
         self.labefore.grid(row = 1, column = 1, columnspan = 1)
         self.labafter.grid(row = 2, column = 1, columnspan = 1)
@@ -68,8 +78,8 @@ class mapslider(Tk):
         """ ...browse and insert the path of FIRST image  """
         self.filename = askopenfilename(parent = self,
                                             title = 'Select the "before" image',
-                                            filetypes = (("All files", "*.*"),
-                                                         ("Images", "*.jpg;*.jpeg;*.png")))
+                                            filetypes = (("Images", "*.jpg;*.jpeg;*.png"),
+                                                         ("All files", "*.*")))
         if self.filename:
             try:
                 self.pathbefore.insert(0, self.filename)
@@ -82,8 +92,8 @@ class mapslider(Tk):
         """ ...browse and insert the path of SECOND image """
         self.filename = askopenfilename(parent = self,
                                         title = 'Select the "after" image',
-                                        filetypes = (("All files", "*.*"),
-                                                     ("Images", "*.jpg;*.jpeg;*.png")))
+                                        filetypes = (("Images", "*.jpg;*.jpeg;*.png"),
+                                                     ("All files", "*.*")))
         if self.filename:
             try:
                 self.pathafter.insert(0, self.filename)
@@ -93,7 +103,7 @@ class mapslider(Tk):
         return self.filename
 
     def setpathtarg(self):
-        """ ...browse and insert the path of destination folder """
+        """ ...browse and insert the path of DESTINATION FOLDER """
         self.foldername = askdirectory(parent = self,
                                      title = 'Select the destination folder')
         if self.foldername:
@@ -104,29 +114,46 @@ class mapslider(Tk):
         # end of function
         return self.foldername
 
-
-    def targetready(self, folder):
-        print folder
-
-    def templhtml(self, img1, img2):
-        self.tpl = open(r'template.html', mode = 'r').readlines()
-        self.out = open(r'result.html', mode = 'a')
-        self.out.write('\n<div id="container"><div><img alt="before" src="IMAGEBEFORE" width="500" /></div><div><img alt="after" src="IMAGEAFTER" width="500" /></div></div></body></html>')
-
-        self.out.close()
+    def processhtml(self):
+        # variables
+        img1 = 'img/' + path.basename(self.pathbefore.get())
+        img2 = 'img/' + path.basename(self.pathafter.get())
+        dest = self.target.get()
+        pathimg = path.join(dest, 'img')
+        pathjs = path.join(dest, 'js')
+        # Preparation of destination folder
+        mkdir(pathimg, 0644)
+        copy2(self.pathbefore.get(), pathimg)
+        copy2(self.pathafter.get(), pathimg)
+        copytree('js', pathjs)
+        # creating the html output
+        with open(r'template.html', 'r') as tpl, open(path.join(dest, 'MapsComparison_slider.html'), 'a') as self.out:
+            for line in tpl.read():
+                self.out.write(line)
+            self.out.write('\n<div id="container">\
+        \n\t<div>\
+        \n\t\t<img alt="before" src="' + img1 + '" width="" />\
+        \n\t</div>\
+        \n\t<div>\
+        \n\t\t<img alt="after" src="' + img2 + '" width="" />\
+        \n\t</div>\
+        \n\t</div>\
+        \n</body>\
+        \n</html>')
 
         # closing GUI
-        self.destroy
+        self.destroy()
+        # opening the output file
+        webview(self.out.name)
         #end of function
-        return self.tpl, self.out
+        return self.out
 
 
 
+###################################
+### Main program initialization ###
+###################################
 
 if __name__ == '__main__':
     app = mapslider()
     app.mainloop()
-
-
-
-
