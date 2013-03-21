@@ -26,12 +26,13 @@ from webbrowser import open as webview
 from modules import EXIF # by https://github.com/ianare/exif-py
 
 ###################################
-## Class and functions definition #
+####### Classes definition ########
 ###################################
 
 class mapslider(Tk):
     """ Main class """
     def __init__(self):
+        # basics
         Tk.__init__(self)   # constructor of parent graphic class
         self.title(u'Choose your maps before and after')
         self.columnconfigure(0, weight=1)
