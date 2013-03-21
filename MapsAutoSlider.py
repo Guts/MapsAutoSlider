@@ -119,11 +119,13 @@ class mapslider(Tk):
         return self.foldername
 
     def processhtml(self):
+        """ export the html output file adding the div needed """
         # if jpeg or tiff images => test images dimensions
         extimg = (path.splitext(self.pathbefore.get())[1],
                   path.splitext(self.pathafter.get())[1])
+        print extimg
         extok = ('.jpeg', '.jpg', '.JPG', '.JPEG', '.tiff', '.TIFF')
-        if [i for i in extimg if i in extok]:
+        if extimg[0] in extok and extimg[1] in extok:
             self.testdim(self.pathbefore.get(), self.pathafter.get())
         else:
             print "Images format couldn't be tested."
@@ -176,9 +178,10 @@ class mapslider(Tk):
         self.l1 = int(str(tag1.get('EXIF ExifImageLength')))
         self.l2 = int(str(tag2.get('EXIF ExifImageLength')))
         # comparing
-        if not self.w1 == self.w2 and self.l1 == self.l2:
-            showerror(self, title='Dimensions error',
-                            message = 'Both images may have the same dimensions')
+        if not self.w1 == self.w2 and not self.l1 == self.l2:
+            showerror(title='Dimensions error',
+                      message = 'Both images may have the same dimensions')
+            self.destroy()
         else:
             'everything ok'
         # end of function
